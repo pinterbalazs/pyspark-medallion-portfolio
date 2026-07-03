@@ -1,0 +1,22 @@
+[project]
+name = "medallion-project"
+version = "0.1.0"
+description = "PySpark medallion architecture portfolio project"
+requires-python = ">=3.11"
+
+dependencies = [
+    "pyspark==4.1.1",
+    "delta-spark==4.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

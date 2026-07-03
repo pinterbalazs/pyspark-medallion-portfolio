@@ -1,0 +1,24 @@
+# Python virtual environment
+.venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Spark / local temporary files
+tmp/
+
+# Generated medallion layer outputs
+data/bronze/
+data/silver/
+data/gold/
+
+# Local test artifacts
+.delta/
+.metastore_db/
+derby.log
+
+# IDE settings
+.vscode/
+.idea/
