@@ -49,21 +49,3 @@ def read_bronze_orders(
         .load(path)
     )
 
-
-def process_bronze_orders(
-    spark: SparkSession,
-    raw_path: str,
-    bronze_path: str,
-    batch_id: str,
-    mode: str = "overwrite",
-) -> DataFrame:
-    raw_df = load_raw_orders(spark, raw_path)
-    bronze_df = add_bronze_metadata(raw_df, batch_id)
-
-    write_bronze_orders(
-        df=bronze_df,
-        path=bronze_path,
-        mode=mode,
-    )
-
-    return read_bronze_orders(spark, bronze_path)

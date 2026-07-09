@@ -3,10 +3,11 @@ from pathlib import Path
 from medallion_project.bronze.orders import (
     add_bronze_metadata,
     load_raw_orders,
-    process_bronze_orders,
     read_bronze_orders,
 )
+from medallion_project.common.config import LocalConfig
 from medallion_project.common.spark import create_spark_session, stop_spark_session
+from medallion_project.pipelines.bronze_orders import BronzeOrdersPipeline
 
 
 def create_test_orders_csv(path: Path) -> None:
@@ -73,26 +74,31 @@ def test_add_bronze_metadata_columns(tmp_path: Path) -> None:
         stop_spark_session(spark)
 
 
-def test_process_bronze_orders_writes_delta_table(tmp_path: Path) -> None:
+def test_bronze_orders_pipeline_writes_delta_table(tmp_path: Path) -> None:
     input_path = tmp_path / "raw" / "orders.csv"
     bronze_path = tmp_path / "bronze" / "orders"
 
     create_test_orders_csv(input_path)
 
-    spark = create_spark_session("test-process-bronze-orders")
+    config = LocalConfig(
+        raw_orders_path=str(input_path),
+        bronze_orders_path=str(bronze_path),
+    )
+
+    pipeline = BronzeOrdersPipeline(
+        config=config,
+        app_name="test-bronze-orders-pipeline",
+        batch_id="test_batch_001",
+        mode="overwrite",
+    )
+
+    pipeline.run()
+
+    assert (bronze_path / "_delta_log").exists()
+
+    spark = create_spark_session("test-bronze-orders-pipeline-verify")
 
     try:
-        df = process_bronze_orders(
-            spark=spark,
-            raw_path=str(input_path),
-            bronze_path=str(bronze_path),
-            batch_id="test_batch_001",
-            mode="overwrite",
-        )
-
-        assert df.count() == 3
-        assert (bronze_path / "_delta_log").exists()
-
         read_df = read_bronze_orders(
             spark=spark,
             path=str(bronze_path),
