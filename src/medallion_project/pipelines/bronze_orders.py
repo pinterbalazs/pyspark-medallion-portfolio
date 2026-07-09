@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from medallion_project.bronze.orders import (
     add_bronze_metadata,
     load_raw_orders,
@@ -13,12 +15,12 @@ class BronzeOrdersPipeline:
         self,
         config: LocalConfig | None = None,
         app_name: str = "bronze-orders-run",
-        batch_id: str = "manual_001",
+        batch_id: str | None = None,
         mode: str = "overwrite",
     ) -> None:
         self.config = config or LocalConfig()
         self.app_name = app_name
-        self.batch_id = batch_id
+        self.batch_id = batch_id or datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
         self.mode = mode
 
     def run(self):
