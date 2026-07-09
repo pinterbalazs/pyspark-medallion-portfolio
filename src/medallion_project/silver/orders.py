@@ -51,28 +51,3 @@ def read_silver_orders(
         .format("delta")
         .load(path)
     )
-
-
-def process_silver_orders(
-    spark: SparkSession,
-    bronze_path: str,
-    silver_path: str,
-    mode: str = "overwrite",
-) -> DataFrame:
-    bronze_df = read_bronze_orders(
-        spark=spark,
-        path=bronze_path,
-    )
-
-    silver_df = transform_silver_orders(bronze_df)
-
-    write_silver_orders(
-        df=silver_df,
-        path=silver_path,
-        mode=mode,
-    )
-
-    return read_silver_orders(
-        spark=spark,
-        path=silver_path,
-    )
