@@ -19,6 +19,10 @@ data/gold/
 .metastore_db/
 derby.log
 
+# Local DuckDB inspection database
+*.duckdb
+*.duckdb.wal
+
 # IDE settings
 .vscode/
 .idea/
