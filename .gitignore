@@ -9,6 +9,9 @@ __pycache__/
 # Spark / local temporary files
 tmp/
 
+# Raw source data (large; not version-controlled)
+data/raw/
+
 # Generated medallion layer outputs
 data/bronze/
 data/silver/
@@ -18,6 +21,10 @@ data/gold/
 .delta/
 .metastore_db/
 derby.log
+
+# Local DuckDB inspection database
+*.duckdb
+*.duckdb.wal
 
 # IDE settings
 .vscode/

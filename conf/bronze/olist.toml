@@ -1,0 +1,55 @@
+# Bronze ingestion manifest for the Olist e-commerce dataset.
+# This is DATA, not code: add / remove / retune tables here without a code release.
+# The framework itself is dataset-agnostic; only this file knows about "olist".
+
+[dataset]
+name = "olist"
+raw_dir = "data/raw/olist"
+bronze_dir = "data/bronze/olist"
+format = "csv"
+
+# Applied to every table; overridden per-table by [tables.options].
+# NOTE: all-string bronze (inferSchema=false) is a framework invariant enforced
+# in code, so it is intentionally NOT listed here.
+[dataset.default_options]
+header = true
+encoding = "UTF-8"
+
+[[tables]]
+name = "customers"
+file = "olist_customers_dataset.csv"
+
+[[tables]]
+name = "geolocation"                              # heaviest (~1M rows), no special options
+file = "olist_geolocation_dataset.csv"
+
+[[tables]]
+name = "order_items"
+file = "olist_order_items_dataset.csv"
+
+[[tables]]
+name = "order_payments"
+file = "olist_order_payments_dataset.csv"
+
+[[tables]]
+name = "order_reviews"                            # free-text with embedded newlines/commas/quotes
+file = "olist_order_reviews_dataset.csv"
+[tables.options]
+multiLine = true
+escape = '"'                                      # TOML literal string = a single " character
+
+[[tables]]
+name = "orders"
+file = "olist_orders_dataset.csv"
+
+[[tables]]
+name = "products"
+file = "olist_products_dataset.csv"
+
+[[tables]]
+name = "sellers"
+file = "olist_sellers_dataset.csv"
+
+[[tables]]
+name = "product_category_translation"             # UTF-8 BOM stripped generically by the loader
+file = "product_category_name_translation.csv"
