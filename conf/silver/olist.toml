@@ -1,0 +1,129 @@
+# Silver manifest for the Olist dataset.
+# DATA, not code: change strategy / keys / tracked attributes / casts here without a release.
+# All bronze columns are string; silver applies the typing and (for SCD2) history.
+# Cast keys refer to the FINAL column name (after any [tables.renames]).
+
+[dataset]
+name = "olist"
+bronze_dir = "data/bronze/olist"
+silver_dir = "data/silver/olist"
+
+# ---------------------------------------------------------------------------
+# SCD2 dimensions (history matters and the business key is stable)
+# ---------------------------------------------------------------------------
+
+[[tables]]
+name = "orders"
+source = "orders"
+strategy = "scd2"
+business_key = ["order_id"]
+tracked_attributes = [
+    "order_status",
+    "order_approved_at",
+    "order_delivered_carrier_date",
+    "order_delivered_customer_date",
+    "order_estimated_delivery_date",
+]
+[tables.casts]
+order_purchase_timestamp = "timestamp"
+order_approved_at = "timestamp"
+order_delivered_carrier_date = "timestamp"
+order_delivered_customer_date = "timestamp"
+order_estimated_delivery_date = "timestamp"
+
+[[tables]]
+name = "products"
+source = "products"
+strategy = "scd2"
+business_key = ["product_id"]
+tracked_attributes = [
+    "product_category_name",
+    "product_name_length",
+    "product_description_length",
+    "product_photos_qty",
+    "product_weight_g",
+    "product_length_cm",
+    "product_height_cm",
+    "product_width_cm",
+]
+[tables.renames]
+product_name_lenght = "product_name_length"
+product_description_lenght = "product_description_length"
+[tables.casts]
+product_name_length = "int"
+product_description_length = "int"
+product_photos_qty = "int"
+product_weight_g = "int"
+product_length_cm = "int"
+product_height_cm = "int"
+product_width_cm = "int"
+
+[[tables]]
+name = "sellers"
+source = "sellers"
+strategy = "scd2"
+business_key = ["seller_id"]
+tracked_attributes = ["seller_zip_code_prefix", "seller_city", "seller_state"]
+# seller_zip_code_prefix stays STRING (leading zeros) -> no cast.
+
+# ---------------------------------------------------------------------------
+# Append / insert-only facts and events (immutable grain)
+# ---------------------------------------------------------------------------
+
+[[tables]]
+name = "customers"
+source = "customers"
+strategy = "append_insert_only"
+business_key = ["customer_id"]
+# customer_zip_code_prefix stays STRING; customer_unique_id retained for gold.
+
+[[tables]]
+name = "order_items"
+source = "order_items"
+strategy = "append_insert_only"
+business_key = ["order_id", "order_item_id"]
+[tables.casts]
+order_item_id = "int"
+price = "double"
+freight_value = "double"
+shipping_limit_date = "timestamp"
+
+[[tables]]
+name = "order_payments"
+source = "order_payments"
+strategy = "append_insert_only"
+business_key = ["order_id", "payment_sequential"]
+[tables.casts]
+payment_sequential = "int"
+payment_installments = "int"
+payment_value = "double"
+
+[[tables]]
+name = "order_reviews"
+source = "order_reviews"
+strategy = "append_insert_only"
+business_key = ["review_id", "order_id"]
+[tables.casts]
+review_score = "int"
+review_creation_date = "timestamp"
+review_answer_timestamp = "timestamp"
+
+# ---------------------------------------------------------------------------
+# Reference / snapshot (no history)
+# ---------------------------------------------------------------------------
+
+[[tables]]
+name = "product_category_translation"
+source = "product_category_translation"
+strategy = "reference_overwrite"
+business_key = ["product_category_name"]
+
+[[tables]]
+name = "geolocation"
+source = "geolocation"
+strategy = "snapshot_overwrite"
+business_key = ["geolocation_zip_code_prefix"]
+transform = "geolocation_collapse"
+[tables.casts]
+geolocation_lat = "double"
+geolocation_lng = "double"
